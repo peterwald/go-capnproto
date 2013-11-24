@@ -6,7 +6,7 @@ see http://kentonv.github.io/capnproto/
 capnpc-go provides the compiler backend for capnp
 after installing to $PATH capnp files can be compiled with
 
-	capnp compile -ogo *.capnp
+    capnp compile -ogo *.capnp
 
 capnpc-go requires two annotations for all types. This is the package and
 import found in go.capnp. Package is needed to know what package to place at
@@ -16,9 +16,9 @@ and is used to generate import statement from other packages and to detect
 when two types are in the same package. Typically these are added as file
 annotations. For example:
 
-	using Go = import "github.com/jmckaskill/go-capnproto/go.capnp";
-	$Go.package("main");
-	$Go.import("github.com/jmckaskill/go-capnproto/example");
+    using Go = import "github.com/jmckaskill/go-capnproto/go.capnp";
+    $Go.package("main");
+    $Go.import("github.com/jmckaskill/go-capnproto/example");
 
 In capnproto a Message is the logical data unit. It may consist of a number of
 segments to allow easier allocation. All objects are values with pointer
@@ -48,54 +48,54 @@ Structs
 
 capnpc-go will generate the following for structs:
 
-	// Foo is a value with pointer semantics referencing the data in a
-	// segment. Member functions are provided to get/set members in the
-	// struct. Getters/setters of an outer struct will use values of type
-	// Foo to set/get pointers.
-	type Foo capn.Struct
+    // Foo is a value with pointer semantics referencing the data in a
+    // segment. Member functions are provided to get/set members in the
+    // struct. Getters/setters of an outer struct will use values of type
+    // Foo to set/get pointers.
+    type Foo capn.Struct
 
-	// NewFoo creates a new orphaned Foo struct. This can then be added to
-	// a message by using a Set function which takes a Foo argument.
-	func NewFoo(s *capn.Segment) Foo
+    // NewFoo creates a new orphaned Foo struct. This can then be added to
+    // a message by using a Set function which takes a Foo argument.
+    func NewFoo(s *capn.Segment) Foo
 
-	// NewRootFoo creates a new root of type Foo at the end of the
-	// provided segment. This is distinct from NewFoo as this always
-	// creates a root tag. Typically the provided segment should be empty.
-	func NewRootFoo(s *capn.Segment) Foo
+    // NewRootFoo creates a new root of type Foo at the end of the
+    // provided segment. This is distinct from NewFoo as this always
+    // creates a root tag. Typically the provided segment should be empty.
+    func NewRootFoo(s *capn.Segment) Foo
 
-	// ReadRootFoo reads the root tag at the beginning of the provided
-	// segment and returns it as a Foo struct.
-	func ReadRootFoo(s *capn.Segment) Foo
+    // ReadRootFoo reads the root tag at the beginning of the provided
+    // segment and returns it as a Foo struct.
+    func ReadRootFoo(s *capn.Segment) Foo
 
-	// Foo_List is a value with pointer semantics. It is created for all
-	// structs, and is used for List(Foo) in the capnp file.
-	type Foo_List capn.List
+    // Foo_List is a value with pointer semantics. It is created for all
+    // structs, and is used for List(Foo) in the capnp file.
+    type Foo_List capn.List
 
-	// NewFooList creates a new orphaned List(Foo). This can then be added
-	// to a message by using a Set function which takes a Foo_List. sz
-	// specifies the list size. Due to the list using memory directly in
-	// the outgoing buffer (i.e. arena style memory management), the size
-	// can not be changed after creation.
-	func NewFooList(s *capn.Segment, sz int) Foo_List
+    // NewFooList creates a new orphaned List(Foo). This can then be added
+    // to a message by using a Set function which takes a Foo_List. sz
+    // specifies the list size. Due to the list using memory directly in
+    // the outgoing buffer (i.e. arena style memory management), the size
+    // can not be changed after creation.
+    func NewFooList(s *capn.Segment, sz int) Foo_List
 
-	// Len returns the list length. For composite lists this is the number
-	// of list elements.
-	func (s Foo_List) Len() int
+    // Len returns the list length. For composite lists this is the number
+    // of list elements.
+    func (s Foo_List) Len() int
 
-	// At returns a pointer to the i'th element. If i is an invalid index,
-	// this will return a null Foo (all getters will return default
-	// values, setters will fail). For a composite list the returned value
-	// will be a list member. Setting another value to point to list
-	// members forces a copy of the data. For pointer lists, the pointer
-	// value will be auto-derefenced.
-	func (s Foo_List) At(i int) Foo
+    // At returns a pointer to the i'th element. If i is an invalid index,
+    // this will return a null Foo (all getters will return default
+    // values, setters will fail). For a composite list the returned value
+    // will be a list member. Setting another value to point to list
+    // members forces a copy of the data. For pointer lists, the pointer
+    // value will be auto-derefenced.
+    func (s Foo_List) At(i int) Foo
 
-	// ToArray converts the capnproto list into a go list. For large lists
-	// this is inefficent as it has to read all elements. This can be
-	// quite convenient especially for iterating as it lets you use a for
-	// range clause:
-	//	for i, f := range mylist.ToArray() {}
-	func (s Foo_List) ToArray() []Foo
+    // ToArray converts the capnproto list into a go list. For large lists
+    // this is inefficent as it has to read all elements. This can be
+    // quite convenient especially for iterating as it lets you use a for
+    // range clause:
+    //  for i, f := range mylist.ToArray() {}
+    func (s Foo_List) ToArray() []Foo
 
 
 
@@ -104,55 +104,55 @@ Groups
 For each group a typedef is created with a different method set for just the
 groups fields:
 
-	struct Foo {
-		group :Group {
-			field @0 :Bool;
-		}
-	}
+    struct Foo {
+        group :Group {
+            field @0 :Bool;
+        }
+    }
 
-	type Foo capn.Struct
-	type FooGroup Foo
+    type Foo capn.Struct
+    type FooGroup Foo
 
-	func (s Foo) Group() FooGroup
-	func (s FooGroup) Field() bool
+    func (s Foo) Group() FooGroup
+    func (s FooGroup) Field() bool
 
 That way the following may be used to access a field in a group:
 
-	var f Foo
-	value := f.Group().Field()
+    var f Foo
+    value := f.Group().Field()
 
 Note that Group accessors just cast the type and so have no overhead
 
-	func (s Foo) Group() FooGroup {return FooGroup(s)}
+    func (s Foo) Group() FooGroup {return FooGroup(s)}
 
 
 
 Unions
 
 Named unions are treated as a group with an inner unnamed union. Unnamed
-unions generate an enum Type_which and a corresponding which() function:
+unions generate an enum Type_which and a corresponding Which() function:
 
-	struct Foo {
-		union {
-			a @0 :Bool;
-			b @1 :Bool;
-		}
-	}
+    struct Foo {
+        union {
+            a @0 :Bool;
+            b @1 :Bool;
+        }
+    }
 
-	type Foo_which uint16
+    type Foo_which uint16
 
-	const (
-		FOO_A Foo_which = 0
-		FOO_B           = 1
-	)
+    const (
+        FOO_A Foo_which = 0
+        FOO_B           = 1
+    )
 
-	func (s Foo) A() bool
-	func (s Foo) B() bool
-	func (s Foo) SetA(v bool)
-	func (s Foo) SetB(v bool)
-	func (s Foo) which() Foo_which
+    func (s Foo) A() bool
+    func (s Foo) B() bool
+    func (s Foo) SetA(v bool)
+    func (s Foo) SetB(v bool)
+    func (s Foo) Which() Foo_which
 
-which() should be checked before using the getters, and the default case must
+Which() should be checked before using the getters, and the default case must
 always be handled.
 
 Setters for single values will set the union discriminator as well as set the
@@ -162,19 +162,19 @@ For groups in unions, there is a group setter that just sets the
 discriminator. This must be called before the group getter can be used to set
 values. For example:
 
-	struct Foo {
-		union {
-			a :group {
-				v :Bool
-			}
-			b :group {
-				v :Bool
-			}
-		}
-	}
+    struct Foo {
+        union {
+            a :group {
+                v :Bool
+            }
+            b :group {
+                v :Bool
+            }
+        }
+    }
 
-	f.SetA()         // Set that we are using group A
-	f.A().SetV(true) // then we can use the group A getter to set the inner values
+    f.SetA()         // Set that we are using group A
+    f.A().SetV(true) // then we can use the group A getter to set the inner values
 
 
 
@@ -182,30 +182,68 @@ Enums
 
 capnpc-go generates enum values in all caps. For example in the capnp file:
 
-	enum ElementSize {
-	  empty @0;
-	  bit @1;
-	  byte @2;
-	  twoBytes @3;
-	  fourBytes @4;
-	  eightBytes @5;
-	  pointer @6;
-	  inlineComposite @7;
-	}
+    enum ElementSize {
+      empty @0;
+      bit @1;
+      byte @2;
+      twoBytes @3;
+      fourBytes @4;
+      eightBytes @5;
+      pointer @6;
+      inlineComposite @7;
+    }
 
 In the generated capnp.go file:
 
-	type ElementSize uint16
+    type ElementSize uint16
 
-	const (
-		ELEMENTSIZE_EMPTY           ElementSize = 0
-		ELEMENTSIZE_BIT                         = 1
-		ELEMENTSIZE_BYTE                        = 2
-		ELEMENTSIZE_TWOBYTES                    = 3
-		ELEMENTSIZE_FOURBYTES                   = 4
-		ELEMENTSIZE_EIGHTBYTES                  = 5
-		ELEMENTSIZE_POINTER                     = 6
-		ELEMENTSIZE_INLINECOMPOSITE             = 7
-	)
+    const (
+        ELEMENTSIZE_EMPTY           ElementSize = 0
+        ELEMENTSIZE_BIT                         = 1
+        ELEMENTSIZE_BYTE                        = 2
+        ELEMENTSIZE_TWOBYTES                    = 3
+        ELEMENTSIZE_FOURBYTES                   = 4
+        ELEMENTSIZE_EIGHTBYTES                  = 5
+        ELEMENTSIZE_POINTER                     = 6
+        ELEMENTSIZE_INLINECOMPOSITE             = 7
+    )
+
+In addition an enum.String() function is generated that will convert the constants to a string
+for debugging or logging purposes. By default, the enum name is used as the tag value,
+but the tags can be customized with a $Go.tag or $Go.notag annotation.
+
+For example:
+
+    enum ElementSize {
+      empty @0           $Go.tag("void");
+      bit @1             $Go.tag("1 bit");
+      byte @2            $Go.tag("8 bits");
+      inlineComposite @7 $Go.notag;
+    }
+
+In the generated go file:
+
+    type ElementSize uint16
+
+    const (
+        ELEMENTSIZE_EMPTY           ElementSize = 0
+        ELEMENTSIZE_BIT                         = 1
+        ELEMENTSIZE_BYTE                        = 2
+        ELEMENTSIZE_INLINECOMPOSITE             = 3
+    )
+
+    func (c ElementSize) String() string {
+        switch c {
+        case ELEMENTSIZE_EMPTY:
+            return "void"
+        case ELEMENTSIZE_BIT:
+            return "1 bit"
+        case ELEMENTSIZE_BYTE:
+            return "8 bits"
+        default:
+            return ""
+        }
+    }
+
 */
 package capn
